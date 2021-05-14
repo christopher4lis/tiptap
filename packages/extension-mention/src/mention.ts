@@ -2,8 +2,8 @@ import { Node, mergeAttributes } from '@tiptap/core'
 import Suggestion, { SuggestionOptions } from '@tiptap/suggestion'
 
 export type MentionOptions = {
-  HTMLAttributes: Record<string, any>,
-  suggestion: Omit<SuggestionOptions, 'editor'>,
+  HTMLAttributes: Record<string, any>
+  suggestion: Omit<SuggestionOptions, 'editor'>
 }
 
 export const Mention = Node.create<MentionOptions>({
@@ -20,19 +20,19 @@ export const Mention = Node.create<MentionOptions>({
           .insertContentAt(range, [
             {
               type: 'mention',
-              attrs: props,
+              attrs: props
             },
             {
               type: 'text',
-              text: ' ',
-            },
+              text: ' '
+            }
           ])
           .run()
       },
       allow: ({ editor, range }) => {
         return editor.can().insertContentAt(range, { type: 'mention' })
-      },
-    },
+      }
+    }
   },
 
   group: 'inline',
@@ -47,29 +47,29 @@ export const Mention = Node.create<MentionOptions>({
     return {
       id: {
         default: null,
-        parseHTML: element => {
+        parseHTML: (element) => {
           return {
-            id: element.getAttribute('data-mention'),
+            id: element.getAttribute('data-mention-id')
           }
         },
-        renderHTML: attributes => {
+        renderHTML: (attributes) => {
           if (!attributes.id) {
             return {}
           }
 
           return {
-            'data-mention': attributes.id,
+            'data-mention-id': attributes.id
           }
-        },
-      },
+        }
+      }
     }
   },
 
   parseHTML() {
     return [
       {
-        tag: 'span[data-mention]',
-      },
+        tag: 'span[data-mention-id]'
+      }
     ]
   },
 
@@ -77,36 +77,41 @@ export const Mention = Node.create<MentionOptions>({
     return [
       'span',
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
-      `${this.options.suggestion.char}${node.attrs.id}`,
+      `${this.options.suggestion.char}${node.attrs.id}`
     ]
   },
 
   renderText({ node }) {
-    return `${this.options.suggestion.char}${node.attrs.id}`
+    return `${this.options.suggestion.char}${node.attrs.label}`
   },
 
   addKeyboardShortcuts() {
     return {
-      Backspace: () => this.editor.commands.command(({ tr, state }) => {
-        let isMention = false
-        const { selection } = state
-        const { empty, anchor } = selection
+      Backspace: () =>
+        this.editor.commands.command(({ tr, state }) => {
+          let isMention = false
+          const { selection } = state
+          const { empty, anchor } = selection
 
-        if (!empty) {
-          return false
-        }
-
-        state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
-          if (node.type.name === this.name) {
-            isMention = true
-            tr.insertText(this.options.suggestion.char || '', pos, pos + node.nodeSize)
-
+          if (!empty) {
             return false
           }
-        })
 
-        return isMention
-      }),
+          state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
+            if (node.type.name === this.name) {
+              isMention = true
+              tr.insertText(
+                this.options.suggestion.char || '',
+                pos,
+                pos + node.nodeSize
+              )
+
+              return false
+            }
+          })
+
+          return isMention
+        })
     }
   },
 
@@ -114,8 +119,8 @@ export const Mention = Node.create<MentionOptions>({
     return [
       Suggestion({
         editor: this.editor,
-        ...this.options.suggestion,
-      }),
+        ...this.options.suggestion
+      })
     ]
-  },
+  }
 })
